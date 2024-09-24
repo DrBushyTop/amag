@@ -1,4 +1,4 @@
-module github.com/DrBushytop/AzureMetricAggregator
+module github.com/DrBushytop/amag
 
 go 1.23.1
 

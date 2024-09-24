@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/DrBushytop/AzureMetricAggregator/pkg/auth"
+	"github.com/DrBushytop/amag/pkg/auth"
 	"golang.org/x/net/context"
 	"io"
 	"net/http"
