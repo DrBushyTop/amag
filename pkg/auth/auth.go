@@ -23,7 +23,7 @@ func NewAuthClient(opts ...AuthClientOpts) (*Client, error) {
 		}
 	}
 
-	if client.cred != nil {
+	if client.cred == nil {
 		cred, err := azidentity.NewDefaultAzureCredential(nil)
 		if err != nil {
 			return nil, fmt.Errorf("NewAuthClient: failed to create default azure credential: %w", err)

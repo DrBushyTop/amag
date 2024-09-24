@@ -1,10 +1,14 @@
 package kql
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/DrBushytop/AzureMetricAggregator/pkg/auth"
+	"golang.org/x/net/context"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type CustomMetricsClient struct {
@@ -42,18 +46,28 @@ func WithHttpClient(httpClient *http.Client) CustomMetricClientOption {
 	}
 }
 
-func (c *CustomMetricsClient) SendCustomMetrics() error {
-	token, err := c.authClient.GetAccessToken([]string{"https://monitoring.azure.com/.default"})
+func (c *CustomMetricsClient) SendCustomMetrics(ctx context.Context, scopeResourceId string, location string, body CustomMetricBody) error {
+	token, err := c.authClient.GetAccessToken([]string{"https://monitoring.azure.com/"})
 	if err != nil {
 		return fmt.Errorf("SendCustomMetrics: failed to get access token: %w", err)
 	}
-	request := http.Request{
-		Header: map[string][]string{
-			"Authorization": {fmt.Sprintf("Bearer %s", token)},
-		},
+
+	// Remove the leading slash from the resourceId as expected by the API
+	scopeResourceId, _ = strings.CutPrefix(scopeResourceId, "/")
+	uriString := fmt.Sprintf("https://%s.monitoring.azure.com/%s/metrics", location, scopeResourceId)
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("SendCustomMetrics: failed to marshal body: %w", err)
 	}
 
-	res, err := c.httpClient.Do(&request)
+	request, err := http.NewRequestWithContext(ctx, "POST", uriString, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return fmt.Errorf("SendCustomMetrics: failed to create request: %w", err)
+	}
+	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	request.Header.Add("Content-Type", "application/json")
+
+	res, err := c.httpClient.Do(request)
 	if err != nil {
 		return fmt.Errorf("SendCustomMetrics: failed to send request: %w", err)
 	}
