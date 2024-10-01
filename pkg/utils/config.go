@@ -1,4 +1,4 @@
-package config
+package utils
 
 type Config struct {
 	workspaceId              string

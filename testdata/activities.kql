@@ -1,0 +1,4 @@
+AppRequests
+| where TimeGenerated > ago(12h)
+| summarize avgRequestDuration=avg(DurationMs) by bin(TimeGenerated, 10m) // use a time grain of 10 minutes
+| project TimeGenerated, avgRequestDuration, MetricValue = avgRequestDuration

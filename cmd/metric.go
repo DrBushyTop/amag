@@ -4,13 +4,12 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/monitor/azquery"
 	"github.com/DrBushytop/amag/pkg/kql"
 	"github.com/charmbracelet/log"
+	"github.com/spf13/viper"
 	"golang.org/x/net/context"
-	"regexp"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -35,10 +34,10 @@ This command requires:
 }
 
 func RunAggregateMetric(cmd *cobra.Command, args []string) {
-	metricName, _ := cmd.Flags().GetString("metric")
-	fileName, _ := cmd.Flags().GetString("file")
-	workspaceId, _ := cmd.Flags().GetString("workspaceid")
-	scopeResourceId, _ := cmd.Flags().GetString("scoperesourceid")
+	metricName := viper.GetString(KeyMetric)
+	fileName := viper.GetString("file")
+	workspaceId := viper.GetString("workspaceid")
+	scopeResourceId := viper.GetString("scoperesourceid")
 	if err := validateResourceId(scopeResourceId); err != nil {
 		log.Error("Error validating scopeResourceId", "err", err)
 		return
@@ -88,25 +87,23 @@ func RunAggregateMetric(cmd *cobra.Command, args []string) {
 	log.Info("Saved custom metric", "metricName", metricName, "metricValue", res, "scope", scopeResourceId)
 }
 
-func validateResourceId(resourceId string) error {
-	unifiedPattern := `^/subscriptions/([a-f0-9\-]{36})/resourceGroups/([a-zA-Z0-9_\-\.]+)/providers/([a-zA-Z0-9_\-\.]+)/([a-zA-Z0-9_\-\.]+)/([a-zA-Z0-9_\-\.]+)(?:/([a-zA-Z0-9_\-\.]+)/([a-zA-Z0-9_\-\.]+))?$`
-	reUnified := regexp.MustCompile(unifiedPattern)
-
-	if !reUnified.MatchString(resourceId) {
-		return fmt.Errorf("invalid resourceId format. Metrics only support resource or subresource scope")
-	}
-	return nil
-}
-
 func init() {
 	aggregateCmd.AddCommand(metricCmd)
 
-	metricCmd.Flags().StringP("file", "f", "", "Relative path to a KQL file to run")
-	_ = metricCmd.MarkFlagRequired("file")
-	metricCmd.Flags().StringP("metric", "m", "", "Name of the custom metric to save the result into")
-	_ = metricCmd.MarkFlagRequired("metric")
-	metricCmd.Flags().StringP("workspaceid", "w", "", "Workspace id (not the resource id) of the Log Analytics workspace to run the aggregate against")
-	_ = metricCmd.MarkFlagRequired("workspaceid")
-	metricCmd.Flags().StringP("scoperesourceid", "s", "", "Resource id of the scope to save the custom metric to")
-	_ = metricCmd.MarkFlagRequired("scoperesourceid")
+	err := bind(metricCmd, KeyFile, "f", "", "Path to the KQL file to run")
+	if err != nil {
+		panic(err)
+	}
+	err = bind(metricCmd, KeyMetric, "m", "", "Name of the custom metric to save the result into")
+	if err != nil {
+		panic(err)
+	}
+	err = bind(metricCmd, KeyWorkspaceID, "w", "", "Workspace id (not the resource id) of the Log Analytics workspace to run the aggregate against")
+	if err != nil {
+		panic(err)
+	}
+	err = bind(metricCmd, KeyScopeResourceID, "s", "", "Resource id of the scope to save the custom metric to")
+	if err != nil {
+		panic(err)
+	}
 }
