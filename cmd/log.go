@@ -94,15 +94,15 @@ This command requires:
 func init() {
 	aggregateCmd.AddCommand(logCmd)
 
-	err := bind(metricCmd, KeyFile, "f", "", "Path to the KQL file to run")
+	err := bind(logCmd, KeyFile, "f", "", "Path to the KQL file to run")
 	if err != nil {
 		panic(err)
 	}
-	err = bind(metricCmd, KeyMetric, "m", "", "Identifier for the metric shown in the metricName column of the Azure Log Analytics table")
+	err = bind(logCmd, KeyMetric, "m", "", "Identifier for the metric shown in the metricName column of the Azure Log Analytics table")
 	if err != nil {
 		panic(err)
 	}
-	err = bind(metricCmd, KeyWorkspaceID, "w", "", "The workspace ID to run the query against")
+	err = bind(logCmd, KeyWorkspaceID, "w", "", "The workspace ID to run the query against")
 	if err != nil {
 		panic(err)
 	}

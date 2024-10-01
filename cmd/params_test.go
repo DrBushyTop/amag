@@ -13,7 +13,7 @@ func TestValidateResourceId(t *testing.T) {
 	}{
 		{
 			name:    "valid resource id",
-			args:    args{resourceId: "/subscriptions/64f552d2-406c-4842-836f-6cd00c086f7e/resourceGroups/huuhkadotnet/providers/Microsoft.OperationalInsights/workspaces/huuhkadotnet-law-prod"},
+			args:    args{resourceId: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM"},
 			wantErr: false,
 		},
 		{
