@@ -27,7 +27,7 @@ amag aggregate metric --file "/path/to/query.kql" --metric "LatencyP90" --worksp
 You can set defaults using the config command or env variables.
 
 This command requires:
-- A KQL query file that defines the aggregation.
+- A KQL query file that defines the aggregation. It must produce a single value in the MetricValue column which is then saved.
 - A valid workspace ID where the query will be executed.
 - Name of the metric. It will be shown in the metricName column of the Azure Log Analytics table.
 - A data collection endpoint to send data to.

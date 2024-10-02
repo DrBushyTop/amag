@@ -33,8 +33,9 @@ az login
 Aggregate KQL query results and save them as [Custom Azure Monitor metrics](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-custom-overview).
 
 **Pre-requisites:**
-- You will need a pre-existing log analytics workspace.
-- You will need to have the Monitoring Metrics Publisher role assigned to the user or service principal running the tool.
+- A pre-existing log analytics workspace.
+- Monitoring Metrics Publisher role assigned to the user or service principal running the tool.
+- A KQL query file that defines the aggregation. It must produce a single value in the MetricValue column which is then saved.
 
 **Usage:**
 
@@ -53,12 +54,13 @@ amag aggregate metric --file ./queries/latency_p90.kql --metric LatencyP90 --wor
 Aggregate KQL query results and save them as [custom logs in Azure Monitor Log Analytics Workspace](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/logs-ingestion-api-overview).
 
 **Pre-requisites:**
-- You will need a pre-existing log analytics workspace.
-- You will also need to have the data collection rule, endpoint and stream name for the custom log. These can be created by running bicep file `./lawsetup/main.bicep` in this repository. It will also output the required params for the command you can use.
+- Pre-existing log analytics workspace.
+- Data collection rule, endpoint and stream name for the custom log. These can be created by running bicep file `./lawsetup/main.bicep` in this repository. It will also output the required params for the command you can use.
     - The bicep file will also set up the required permissions for given user to write custom logs. These can take a while to propagate. 
     - ```powershell
       New-AzResourceGroupDeployment -ResourceGroupName "amag" -TemplateFile "./lawsetup/main.bicep" -logAnalyticsName "amagws" -location "swedencentral" -metricsPublisherObjectId "f8c353f7-0b21-4a15-9693-a9ebf5f5c073" -dataCollectionEndpointName "amagendpoint" -dataCollectionRuleName "amagrule" -enableErrorDiagnosticLogs $true
       ```
+- A KQL query file that defines the aggregation. It must produce a single value in the MetricValue column which is then saved.
 
 **Usage:**
 
