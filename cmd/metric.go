@@ -79,6 +79,7 @@ func RunAggregateMetric(cmd *cobra.Command, args []string) {
 	log.Info("Sending custom metric")
 	if err := cmClient.SendCustomMetrics(context.Background(), scopeResourceId, "westeurope", body); err != nil {
 		log.Error("Failed to send custom metrics", "err", err)
+		return
 	}
 
 	log.Info("Saved custom metric", "metricName", metricName, "metricValue", res, "scope", scopeResourceId)

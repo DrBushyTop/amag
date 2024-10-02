@@ -3,6 +3,9 @@ param logAnalyticsName string
 param dataCollectionEndpointName string
 param dataCollectionRuleName string
 
+@description('Should the diagnostics settings be enabled to send error logs to the Log Analytics workspace')
+param enableErrorDiagnosticLogs bool
+
 param metricsPublisherObjectId string = ''
 
 param retentionInDays int = 730
@@ -86,6 +89,20 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
         columns: tableSchema
       }
     }
+  }
+}
+
+resource diagnosticsSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (enableErrorDiagnosticLogs) {
+  name: 'logErrorsToLogAnalytics'
+  scope: dataCollectionRule
+  properties: {
+    logs: [
+      {
+        category: 'LogErrors'
+        enabled: true
+      }
+    ]
+    workspaceId: logAnalytics.id
   }
 }
 

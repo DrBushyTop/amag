@@ -91,6 +91,7 @@ func RunAggregateLog(cmd *cobra.Command, args []string) {
 	log.Info("Sending log")
 	if err := logsClient.SaveLogEntryToLogAnalytics(context.Background(), []kql.AggregateLogEntry{ag}); err != nil {
 		log.Error("Failed to send log", "err", err)
+		return
 	}
 	log.Info("Saved log", "metricName", metricName, "metricValue", res)
 }
