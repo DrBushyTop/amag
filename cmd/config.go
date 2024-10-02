@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"slices"
+	"strings"
 )
 
 var configCmd = &cobra.Command{
@@ -32,12 +33,12 @@ var configSetCmd = &cobra.Command{
 				err = viper.SafeWriteConfig()
 			}
 			if err != nil {
-				fmt.Println("Error writing config file:", err)
+				log.Error("Error writing config file:", err)
 			} else {
-				fmt.Println("Configuration saved.")
+				log.Info("Configuration saved.")
 			}
 		} else {
-			fmt.Println("Configuration saved.")
+			log.Info("Configuration saved.")
 		}
 	},
 }
@@ -60,8 +61,28 @@ var configLoadCmd = &cobra.Command{
 	},
 }
 
+var configShowCmd = &cobra.Command{
+	Use:   "show",
+	Short: "Show the current configuration",
+	Run: func(cmd *cobra.Command, args []string) {
+		ignoredKeys := []string{
+			"help",
+			"no-descriptions",
+		}
+
+		sb := strings.Builder{}
+		for _, key := range viper.AllKeys() {
+			if viper.GetString(key) != "" && !strings.Contains(key, ".") && !slices.Contains(ignoredKeys, key) {
+				sb.WriteString(key + ": " + viper.GetString(key) + "\n")
+			}
+		}
+		log.Info("Current configuration:", "keys", sb.String())
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configSetCmd)
 	configCmd.AddCommand(configLoadCmd)
+	configCmd.AddCommand(configShowCmd)
 }

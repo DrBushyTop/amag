@@ -21,12 +21,16 @@ const (
 func bind(cmd *cobra.Command, keyName string, shortHand string, value string, usage string) error {
 	cmd.Flags().StringP(keyName, shortHand, value, usage)
 	_ = cmd.MarkFlagRequired(keyName)
-	err := viper.BindPFlag(keyName, cmd.Flags().Lookup(keyName))
+	err := viper.BindPFlag(GetViperKey(cmd, keyName), cmd.Flags().Lookup(keyName))
 	if err != nil {
 		log.Error("Failed to bind flag", "name", keyName, "err", err)
 		return err
 	}
 	return nil
+}
+
+func GetViperKey(cmd *cobra.Command, key string) string {
+	return fmt.Sprintf("%s.%s", cmd.Name(), key)
 }
 
 func bindPersistent(cmd *cobra.Command, keyName string, shortHand string, value string, usage string) error {

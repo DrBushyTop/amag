@@ -166,6 +166,7 @@ go.work
 !go.sum
 !go.mod
 
+!makefile
 !/lawsetup/*
 !/testdata/*
 

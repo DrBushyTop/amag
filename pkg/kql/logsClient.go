@@ -15,9 +15,9 @@ type ingestClient interface {
 }
 
 type AggregateLogEntry struct {
-	TimeGenerated time.Time `json:"timeGenerated"`
-	Name          string    `json:"name"`
-	Value         float64   `json:"value"`
+	TimeGenerated time.Time `json:"TimeGenerated"`
+	Name          string    `json:"Name"`
+	Value         float64   `json:"Value"`
 }
 
 type LogsClient struct {
@@ -77,7 +77,7 @@ func WithIngestCredential(cred azcore.TokenCredential) LogsClientOption {
 	}
 }
 
-func (lc *LogsClient) SaveLogEntryToLogAnalytics(ctx context.Context, entry AggregateLogEntry) error {
+func (lc *LogsClient) SaveLogEntryToLogAnalytics(ctx context.Context, entry []AggregateLogEntry) error {
 
 	logs, err := json.Marshal(entry)
 	if err != nil {

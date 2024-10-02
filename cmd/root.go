@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/pflag"
 	"os"
 
 	"github.com/charmbracelet/log"
@@ -32,8 +33,29 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(func() {
+		initConfig()
+		postInitCommands(rootCmd.Commands())
+	})
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.amag/config.yaml)")
+}
+
+func postInitCommands(commands []*cobra.Command) {
+	for _, cmd := range commands {
+		presetRequiredFlags(cmd)
+		if cmd.HasSubCommands() {
+			postInitCommands(cmd.Commands())
+		}
+	}
+}
+
+func presetRequiredFlags(cmd *cobra.Command) {
+	viper.BindPFlags(cmd.Flags())
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
+			cmd.Flags().Set(f.Name, viper.GetString(f.Name))
+		}
+	})
 }
 
 func initConfig() {
@@ -47,7 +69,16 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		viper.AddConfigPath(home + "/.amag")
+		configPath := home + "/.amag"
+
+		// If the folder doesn't exist, create it
+		err = os.MkdirAll(configPath, os.ModePerm)
+		if err != nil {
+			fmt.Printf("Error creating config folder: %v\n", err)
+			return
+		}
+
+		viper.AddConfigPath(configPath)
 		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
 	}
@@ -55,6 +86,6 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		log.Info("Using config file:", viper.ConfigFileUsed())
+		log.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
 }
