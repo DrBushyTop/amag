@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"slices"
 	"strings"
 )
@@ -50,14 +51,25 @@ var configLoadCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath := args[0]
 
-		viper.SetConfigFile(configPath)
-
-		viper.SetConfigType("yaml")
-		if err := viper.ReadInConfig(); err != nil {
-			log.Error("Error reading config file:", err)
-		} else {
-			log.Info("Configuration loaded from", viper.ConfigFileUsed())
+		confFile, err := os.Open(configPath)
+		if err != nil {
+			log.Error("Error opening config file", "err", err)
+			return
 		}
+		defer confFile.Close()
+		err = viper.ReadConfig(confFile)
+		if err != nil {
+			log.Error("Error reading config file", "err", err)
+			return
+		}
+
+		err = viper.WriteConfig()
+		if err != nil {
+			log.Error("Error writing config file", "err", err)
+			return
+		}
+
+		log.Infof("Configuration loaded from %s", configPath)
 	},
 }
 

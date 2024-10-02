@@ -119,7 +119,7 @@ resource dataCollectionRulePublisherGroup 'Microsoft.Authorization/roleAssignmen
   }
 }
 
-output dataCollectionEndpointAddress string = dataCollectionEndpoint.properties.logsIngestion.endpoint
+output dataCollectionEndpoint string = dataCollectionEndpoint.properties.logsIngestion.endpoint
 output dataCollectionRuleId string = dataCollectionRule.properties.immutableId
 output dataCollectionStreamName string = dataCollectionStreamName
 output warning string = metricsPublisherObjectId == ''
