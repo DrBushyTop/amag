@@ -57,7 +57,7 @@ Aggregate KQL query results and save them as [custom logs in Azure Monitor Log A
 - You will also need to have the data collection rule, endpoint and stream name for the custom log. These can be created by running bicep file `./lawsetup/main.bicep` in this repository. It will also output the required params for the command you can use.
     - The bicep file will also set up the required permissions for given user to write custom logs. These can take a while to propagate. 
     - ```powershell
-      New-AzResourceGroupDeployment -ResourceGroupName "amag" -TemplateFile "./lawsetup/main.bicep" -logAnalyticsName "amagws" -location "swedencentral" -metricsPublisherObjectId "f8c353f7-0b21-4a15-9693-a9ebf5f5c073" -dataCollectionEndpointName "amagendpoint" -dataCollectionRuleName "amagrule"
+      New-AzResourceGroupDeployment -ResourceGroupName "amag" -TemplateFile "./lawsetup/main.bicep" -logAnalyticsName "amagws" -location "swedencentral" -metricsPublisherObjectId "f8c353f7-0b21-4a15-9693-a9ebf5f5c073" -dataCollectionEndpointName "amagendpoint" -dataCollectionRuleName "amagrule" -enableErrorDiagnosticLogs $true
       ```
 
 **Usage:**
