@@ -20,7 +20,7 @@ var logCmd = &cobra.Command{
 and save it as a custom metric in Azure Monitor. This command is useful for transforming
 Log Analytics query results into aggregated log entries that can be monitored and visualized over time.
 
-TimeGenerated in the query result is used as OriginalTimeGenerated in the resulting log entry, whereas the current time is used as TimeGenerated.
+TimeGenerated column in the query result is used as OriginalTimeGenerated in the resulting log entry, whereas the current time is used as TimeGenerated.
 This is due to logs being able to be sent to log analytics only within 2 days to the past.
 
 Example usage:
@@ -30,7 +30,7 @@ amag aggregate metric --file "/path/to/query.kql" --metric "LatencyP90" --worksp
 You can set defaults using the config command or env variables.
 
 This command requires:
-- A KQL query file that defines the aggregation. It should have at least columns named TimeGenerated and MetricValue. All results are saved.
+- A KQL query file that defines the aggregation. It should have at least column MetricValue. All results are saved.
 - A valid workspace ID where the query will be executed.
 - Name of the metric. It will be shown in the metricName column of the Azure Log Analytics table.
 - A data collection endpoint to send data to.

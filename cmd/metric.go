@@ -24,7 +24,7 @@ Example usage:
 amag aggregate metric --file /path/to/query.kql --metric LatencyP90 --workspaceid <workspace-id> --scoperesourceid <scope-resource-id>
 
 This command requires:
-- A KQL query file that defines the aggregation. It must have at least columns named TimeGenerated and MetricValue. Only the first row of the result is used.
+- A KQL query file that defines the aggregation. It must have at least a column named MetricValue. Only the first row of the result is used, TimeGenerated is ignored.
 - A valid workspace ID where the query will be executed.
 - A scope resource ID where the custom metric will be saved. This can be a resource or subresource ID.`,
 	Run: RunAggregateMetric,

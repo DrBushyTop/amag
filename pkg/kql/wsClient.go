@@ -12,8 +12,8 @@ import (
 )
 
 type LogLine struct {
-	TimeGenerated time.Time `json:"TimeGenerated"`
-	MetricValue   float64   `json:"MetricValue"`
+	TimeGenerated *time.Time `json:"TimeGenerated"`
+	MetricValue   float64    `json:"MetricValue"`
 }
 
 type queryClient interface {
@@ -106,44 +106,45 @@ func (wsc *WorkspaceClient) QueryWorkspaceForAggregateValue(ctx context.Context,
 			continue
 		}
 	}
-	if metricValueIndex == -1 || timeGeneratedIndex == -1 {
+	if metricValueIndex == -1 {
 		columnNames := make([]string, len(result.Tables[0].Columns))
 		for i, col := range result.Tables[0].Columns {
 			columnNames[i] = *col.Name
 		}
-		if metricValueIndex == -1 {
-			return []LogLine{}, fmt.Errorf("QueryWorkspaceForAggregateValue: 'MetricValue' column not found in the result. Found columns: %v", columnNames)
-		} else {
-			return []LogLine{}, fmt.Errorf("QueryWorkspaceForAggregateValue: 'TimeGenerated' column not found in the result. Found columns: %v", columnNames)
-		}
+		return []LogLine{}, fmt.Errorf("QueryWorkspaceForAggregateValue: 'MetricValue' column not found in the result. Found columns: %v", columnNames)
 	}
 
 	layout := "2006-01-02T15:04:05Z"
 	res := make([]LogLine, len(result.Tables[0].Rows))
-	for _, row := range result.Tables[0].Rows {
-		timeGenerated := row[timeGeneratedIndex].(string)
-		parsedTime, err := time.Parse(layout, timeGenerated)
-		if err != nil {
-			return []LogLine{}, fmt.Errorf("QueryWorkspaceForAggregateValue: failed to parse TimeGenerated %v as time: %w", timeGenerated, err)
+	for i, row := range result.Tables[0].Rows {
+		var parsedTime *time.Time
+		if timeGeneratedIndex != -1 {
+			timeGenerated := row[timeGeneratedIndex].(string)
+			pTime, err := time.Parse(layout, timeGenerated)
+			if err != nil {
+				return []LogLine{}, fmt.Errorf("QueryWorkspaceForAggregateValue: failed to parse TimeGenerated %v as time: %w", timeGenerated, err)
+			}
+			parsedTime = &pTime
 		}
+
 		metricValue := row[metricValueIndex]
 		switch v := metricValue.(type) {
 		case float64:
 			// Metric value is already a float
-			res = append(res, LogLine{parsedTime, v})
+			res[i] = LogLine{parsedTime, v}
 		case float32:
 			// Convert to float64 if it's a float32
-			res = append(res, LogLine{parsedTime, float64(v)})
+			res[i] = LogLine{parsedTime, float64(v)}
 		case int:
 			// Convert integer to float64
-			res = append(res, LogLine{parsedTime, float64(v)})
+			res[i] = LogLine{parsedTime, float64(v)}
 		case string:
 			// Try to parse the string as a float
 			value, err := strconv.ParseFloat(v, 64)
 			if err != nil {
 				return []LogLine{}, fmt.Errorf("QueryWorkspaceForAggregateValue: failed to parse MetricValue %v as float: %w", metricValue, err)
 			}
-			res = append(res, LogLine{parsedTime, value})
+			res[i] = LogLine{parsedTime, value}
 		default:
 			return []LogLine{}, fmt.Errorf("QueryWorkspaceForAggregateValue: unexpected MetricValue type %T, value: %v", metricValue, metricValue)
 		}
