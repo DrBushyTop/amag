@@ -7,17 +7,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/monitor/ingestion/azlogs"
-	"time"
 )
 
 type ingestClient interface {
 	Upload(ctx context.Context, ruleID string, streamName string, logs []byte, options *azlogs.UploadOptions) (azlogs.UploadResponse, error)
-}
-
-type AggregateLogEntry struct {
-	TimeGenerated time.Time `json:"TimeGenerated"`
-	Name          string    `json:"Name"`
-	Value         float64   `json:"Value"`
 }
 
 type LogsClient struct {

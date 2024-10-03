@@ -22,6 +22,10 @@ var tableSchema = [
     type: 'datetime'
   }
   {
+    name: 'OriginalTimeGenerated'
+    type: 'datetime'
+  }
+  {
     name: 'Name'
     type: 'string'
   }

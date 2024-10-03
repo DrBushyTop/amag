@@ -18,7 +18,10 @@ var logCmd = &cobra.Command{
 	Short: "Aggregate KQL values and save as logs",
 	Long: `Run a specified KQL file against an Azure Log Analytics workspace, aggregate the result,
 and save it as a custom metric in Azure Monitor. This command is useful for transforming
-Log Analytics query results into metrics that can be monitored and visualized over time.
+Log Analytics query results into aggregated log entries that can be monitored and visualized over time.
+
+TimeGenerated in the query result is used as OriginalTimeGenerated in the resulting log entry, whereas the current time is used as TimeGenerated.
+This is due to logs being able to be sent to log analytics only within 2 days to the past.
 
 Example usage:
 
@@ -27,7 +30,7 @@ amag aggregate metric --file "/path/to/query.kql" --metric "LatencyP90" --worksp
 You can set defaults using the config command or env variables.
 
 This command requires:
-- A KQL query file that defines the aggregation. It must produce a single value in the MetricValue column which is then saved.
+- A KQL query file that defines the aggregation. It should have at least columns named TimeGenerated and MetricValue. All results are saved.
 - A valid workspace ID where the query will be executed.
 - Name of the metric. It will be shown in the metricName column of the Azure Log Analytics table.
 - A data collection endpoint to send data to.
@@ -82,18 +85,23 @@ func RunAggregateLog(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	ag := kql.AggregateLogEntry{
-		TimeGenerated: time.Now(),
-		Name:          metricName,
-		Value:         res,
+	var ag []kql.AggregateLogEntry
+
+	for _, r := range res {
+		ag = append(ag, kql.AggregateLogEntry{
+			TimeGenerated:         time.Now(),
+			OriginalTimeGenerated: r.TimeGenerated,
+			Name:                  metricName,
+			Value:                 r.MetricValue,
+		})
 	}
 
 	log.Info("Sending log")
-	if err := logsClient.SaveLogEntryToLogAnalytics(context.Background(), []kql.AggregateLogEntry{ag}); err != nil {
+	if err := logsClient.SaveLogEntryToLogAnalytics(context.Background(), ag); err != nil {
 		log.Error("Failed to send log", "err", err)
 		return
 	}
-	log.Info("Saved log", "metricName", metricName, "metricValue", res)
+	log.Info("Saved log", "metricName", metricName, "number of entries", len(ag))
 }
 
 func init() {
